@@ -154,8 +154,8 @@ is why the hard set exists.
 
 On the hard set Claude still found all 15 tasks in every run with the right owner, including the
 person who was not in the meeting, and every tricky deadline: the one corrected mid-sentence,
-"end of the month", "within two weeks", "next Wednesday". Precision drops to 94%: three extra tasks
-over three runs, so the set separates prompts again.
+"end of the month", "within two weeks", "next Wednesday". With the first prompt (v1) precision
+dropped to 94%: three extra tasks over three runs, so the set separates prompts again.
 
 **Error analysis** (`run_eval.py` prints every extra task, miss and wrong field per meeting): all
 three extras are the same sentence, once per run:
