@@ -26,7 +26,8 @@ what would happen and writes nothing; issues are only created after an explicit 
 
 ## Run it locally (step by step)
 
-You need **Python 3.10+** and **git**. The demo runs on your own machine and never writes to GitHub.
+You need **Python 3.10+** and **git**. The demo runs on your own machine and only writes to GitHub
+after you confirm it under "Send to GitHub".
 
 1. Get the code:
    ```bash
