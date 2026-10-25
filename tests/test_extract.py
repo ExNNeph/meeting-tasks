@@ -28,6 +28,10 @@ def test_guardrail_accepts_quote_with_different_punctuation_and_case():
     assert ex.grounded(task, NOTES) is None
 
 
+def test_guardrail_rejects_task_without_quote():
+    assert ex.grounded(Task(title="Send quote", owner="Ben"), NOTES) == "no supporting quote"
+
+
 def test_guardrail_rejects_invented_quote_and_unknown_owner():
     assert "quote" in ex.grounded(Task(title="Call Acme", owner="Ben", quote="I'll call Acme"), NOTES)
     assert "owner" in ex.grounded(Task(title="Send quote", owner="Zoe", quote="I'll send it by Wednesday"), NOTES)

@@ -7,8 +7,9 @@ from .models import Task
 
 
 def issue_body(task: Task, source: str) -> str:
+    quote = f"> {task.quote}" if task.quote else "_Added by hand during review_"
     lines = [f"**Owner:** {task.owner or 'unassigned'}", f"**Due:** {task.due or 'no deadline'}", "",
-             f"> {task.quote}", "", f"_Extracted by meeting-tasks from {source}_"]
+             quote, "", f"_Extracted by meeting-tasks from {source}_"]
     return "\n".join(lines)
 
 

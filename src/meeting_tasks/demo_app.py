@@ -7,6 +7,7 @@ import streamlit as st
 
 from meeting_tasks.extract import MODEL, extract
 from meeting_tasks.issues import issue_body
+from meeting_tasks.models import Task
 
 SAMPLE = """Anna: Okay, let's start. The Acme demo went well last week.
 Ben: Agreed. They want a revised quote before they sign.
@@ -52,6 +53,7 @@ def cached_extract(text: str, day: date, key: str):
 if st.button("Extract tasks", type="primary"):
     st.session_state.result = cached_extract(notes, meeting_date, api_key)
     st.session_state.result_for = (notes, meeting_date, api_key)
+    st.session_state.run_id = st.session_state.get("run_id", 0) + 1  # fresh editor for each extraction
 
 result = st.session_state.get("result")
 if result is None:
@@ -68,23 +70,41 @@ else:
     st.info("Extracted by the keyword baseline. It also picks up phrases like \"I'll be honest\" and duplicates; "
             "add an API key to see how Claude handles them.")
 
-st.subheader(f"Tasks ({len(result.tasks)})")
-if result.tasks:
-    # every column all-text: mixing date objects and "—" breaks Streamlit's Arrow conversion
-    st.dataframe(pd.DataFrame([{"task": t.title, "owner": t.owner or "—",
-                                "due": t.due.isoformat() if t.due else "—", "quote": t.quote}
-                               for t in result.tasks]), hide_index=True, width="stretch")
-else:
-    st.write("No action items found.")
-
 if result.dropped:
-    st.subheader(f"Dropped by the guardrail ({len(result.dropped)})")
-    for task, why in result.dropped:
-        st.warning(f"**{task.title}**: {why}")
+    with st.expander(f"Dropped by the guardrail ({len(result.dropped)})"):
+        for task, why in result.dropped:
+            st.warning(f"**{task.title}**: {why}")
 
-if result.tasks:
-    st.subheader("GitHub issue preview")
+st.subheader("Review the tasks")
+st.caption("Edit text, owner or due date, delete rows (select, then 🗑) or add one at the bottom. "
+           "The quote is the evidence from the notes and stays locked. Only this table is sent to GitHub.")
+edited = st.data_editor(
+    # dates stay date objects (or None) so Arrow keeps one column type
+    pd.DataFrame([{"task": t.title, "owner": t.owner, "due": t.due, "quote": t.quote} for t in result.tasks],
+                 columns=["task", "owner", "due", "quote"]),
+    num_rows="dynamic", hide_index=True, width="stretch", key=f"tasks{st.session_state.get('run_id', 0)}",
+    column_config={"task": st.column_config.TextColumn(required=True), "due": st.column_config.DateColumn(),
+                   "quote": st.column_config.TextColumn(disabled=True)},
+)
+
+
+def text(value) -> str:
+    return "" if value is None or pd.isna(value) else str(value).strip()
+
+
+tasks = []
+for row in edited.to_dict("records"):
+    if len(text(row["task"])) < 3:
+        continue  # empty row just added, or a title too short to be a task
+    tasks.append(Task(title=text(row["task"]), owner=text(row["owner"]), quote=text(row["quote"]),
+                      due=None if pd.isna(row["due"]) else pd.to_datetime(row["due"]).date()))
+st.session_state.tasks = tasks
+
+if tasks:
+    st.subheader(f"GitHub issue preview ({len(tasks)})")
     st.caption("This is what `meeting-tasks notes.txt --repo you/your-repo --create` would create.")
-    for t in result.tasks:
+    for t in tasks:
         with st.expander(t.title):
             st.markdown(issue_body(t, "notes.txt"))
+else:
+    st.write("No tasks to send.")

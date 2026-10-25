@@ -42,6 +42,8 @@ def _norm(text: str) -> str:
 
 def grounded(task: Task, transcript: str) -> str | None:
     """Guardrail: return why the task is not backed by the transcript, or None if it is."""
+    if len(_norm(task.quote)) < 3:
+        return "no supporting quote"
     if _norm(task.quote) not in _norm(transcript):
         return "quote not found in the transcript"
     if task.owner and _norm(task.owner) not in _norm(transcript):

@@ -23,11 +23,13 @@ def test_demo_extracts_with_rules_and_previews_issues(app):
     at = app.run()
     at.button[0].click().run()
     assert not at.exception
-    table = at.dataframe[0].value
+    table = at.dataframe[0].value  # the editable review table
     assert "send the revised quote to Acme" in list(table["task"])
-    assert len(at.expander) == len(table)  # one issue preview per task
+    tasks = at.session_state["tasks"]  # what would be sent to GitHub
+    assert [t.title for t in tasks] == list(table["task"])
+    assert len(at.expander) == len(tasks)  # one issue preview per task (rules drop nothing)
     # regression: tasks with and without a deadline in one column made Arrow log a traceback
-    assert {"—", "2026-10-28"} <= set(table["due"]) and all(isinstance(d, str) for d in table["due"])
+    assert {t.due is None for t in tasks} == {True, False}
 
 
 def test_demo_without_streamlit_gives_install_hint(monkeypatch):

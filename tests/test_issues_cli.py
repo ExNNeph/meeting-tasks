@@ -39,6 +39,11 @@ def test_create_skips_existing_and_passes_body(gh):
     assert results[0][1].startswith("created https://github.com/")
 
 
+def test_body_of_task_added_by_hand():
+    body = issues.issue_body(Task(title="Order pizza for the workshop"), "notes.txt")
+    assert "**Owner:** unassigned" in body and "Added by hand" in body and ">" not in body
+
+
 def test_cli_create_requires_repo(tmp_path):
     notes = tmp_path / "n.txt"
     notes.write_text("Anna: I'll send the deck.")
