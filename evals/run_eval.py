@@ -22,7 +22,8 @@ def evaluate(run, repeats):
     total, dropped = Counter(), 0
     for name, case in GOLD.items():
         text, day = (HERE / "meetings" / name).read_text(), date.fromisoformat(case["date"])
-        for _ in range(repeats):
+        for i in range(repeats):
+            print(f"  {name} run {i + 1}/{repeats} …", file=sys.stderr, flush=True)  # LLM calls take seconds each
             tasks, n_dropped = run(text, day)
             total.update(score(tasks, case["tasks"]))
             dropped += n_dropped

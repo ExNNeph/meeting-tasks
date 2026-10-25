@@ -105,12 +105,22 @@ pytest                            # unit tests + sanity checks on the answer key
 
 ## Results
 
-| extractor | tasks found | precision | recall | F1 | owner correct | due date correct |
-|---|---|---|---|---|---|---|
-| keyword baseline | 19 | 53% | 62% | 57% | 90% | 80% |
+`python evals/run_eval.py 3` (4 meetings, Claude 3 runs each):
+
+| extractor | tasks found | precision | recall | F1 | owner correct | due date correct | guardrail drops |
+|---|---|---|---|---|---|---|---|
+| keyword baseline | 19 | 53% | 62% | 57% | 90% | 90% | 0 |
+| Claude (`claude-opus-5-5`) + guardrail | 48 | **100%** | **100%** | **100%** | 100% | 100% | 0 |
 
 The baseline finds most explicit commitments but also every "I'll be honest" and duplicate, and
-nothing at all in notes without speaker names.
+nothing at all in notes without speaker names. Claude found all 16 tasks in every run, skipped every
+trap, resolved every relative deadline and never needed the guardrail.
+
+Cost: about 850 input and 415 output tokens per meeting, roughly $0.01 per meeting at Opus 5.5 prices.
+
+**What 100% means:** this eval is now too easy to tell a good prompt from a better one. It proves the
+traps are handled, not that the extractor is perfect. The next step is harder meetings: longer
+transcripts, interruptions, tasks split across speakers, and implicit owners ("someone should…").
 
 ## Known limits
 
