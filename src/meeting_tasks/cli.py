@@ -5,7 +5,7 @@ from datetime import date
 from pathlib import Path
 
 from .extract import extract
-from .issues import sync
+from .issues import parse_team, sync
 
 DEMO_APP = Path(__file__).with_name("demo_app.py")
 
@@ -33,9 +33,14 @@ def main(argv: list[str] | None = None) -> None:
                    help="meeting date for relative deadlines like 'Friday' (default: today)")
     p.add_argument("--repo", help="owner/name of the GitHub repo for the issues")
     p.add_argument("--create", action="store_true", help="actually create the issues (default: preview only)")
+    p.add_argument("--team", type=Path, help="file with 'Name = github-username' lines; matching owners are assigned")
     args = p.parse_args(argv)
     if args.create and not args.repo:
         p.error("--create needs --repo")
+    try:
+        team = parse_team(args.team.read_text(encoding="utf-8")) if args.team else {}
+    except ValueError as e:
+        p.error(f"{args.team}: {e}")
 
     result = extract(args.notes.read_text(encoding="utf-8"), args.date)
     print(f"{len(result.tasks)} task(s) found ({result.source})" + (f": {result.error}" if result.error else ""))
@@ -44,7 +49,7 @@ def main(argv: list[str] | None = None) -> None:
     for t, why in result.dropped:
         print(f"  dropped by guardrail: {t.title!r} ({why})")
     if args.repo:
-        for t, status in sync(result.tasks, args.repo, args.notes.name, args.create):
+        for t, status in sync(result.tasks, args.repo, args.notes.name, args.create, team):
             print(f"{status}: {t.title}")
         if not args.create:
             print("Preview only. Add --create to create these issues.")
