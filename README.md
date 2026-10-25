@@ -145,7 +145,7 @@ pytest                            # unit tests + sanity checks on the answer key
 | standard | keyword baseline | 19 | 53% | 62% | 57% | 90% | 90% | 0 |
 | standard | Claude (`claude-opus-5-5`) + guardrail | 48 | **100%** | **100%** | **100%** | 100% | 100% | 0 |
 | hard | keyword baseline | 11 | 73% | 53% | 62% | 100% | 62% | 0 |
-| hard | Claude (`claude-opus-5-5`) + guardrail | 48 | **94%** | **100%** | **97%** | 100% | 100% | 0 |
+| hard | Claude (`claude-opus-5-5`) + guardrail, prompt v2 | 44 | **100%** | **98%** | **99%** | 100% | 100% | 0 |
 
 On the standard set the baseline finds most explicit commitments but also every "I'll be honest" and
 duplicate, and nothing at all in notes without speaker names. Claude found all 16 tasks in every run,
@@ -167,8 +167,22 @@ retro-notes.txt   extra: 'Deliver designs two days before sprint start' (Julia)
 
 The roadmap review and support escalation were clean in all runs. So the only disagreement is a
 definition question, not a hallucination: "from now on" is a standing working agreement, which the
-answer key does not count as a one-off task for the backlog. Claude treats it as a commitment. The
-prompt never says which one is wanted, which makes this the obvious next prompt change to measure.
+answer key does not count as a one-off task for the backlog. Claude treats it as a commitment,
+because the prompt never said which one is wanted.
+
+**Prompt v2** adds one sentence: *do not include standing agreements or new habits ("from now on",
+"always", "every sprint"); only one-off tasks that can be finished and closed.* Hard set, 3 runs:
+
+| prompt | tasks found | precision | recall | F1 | errors |
+|---|---|---|---|---|---|
+| v1 | 48 | 94% | 100% | 97% | 3× extra: the standing agreement |
+| v2 (current) | 44 | **100%** | 98% | **99%** | 1× missed: the conditional task "update the signup page if legal approves" |
+
+The fix removed the target error in every run, and the standard set stayed at 100%. It also had a side
+effect: in one of three runs Claude left out the conditional task, the other judgment call in the
+answer key, apparently reading "can be finished and closed" as excluding tasks that wait on someone
+else. Two caveats: the change was written against a known error on a small set, so the real test is
+new meetings; and one miss in three runs is within what a rerun can change.
 
 Cost: about 890 input and 570 output tokens per meeting, roughly $0.015 per meeting at Opus 5.5
 prices; the full run above (21 Claude calls) cost about $0.31.
