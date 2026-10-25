@@ -26,6 +26,8 @@ def test_demo_extracts_with_rules_and_previews_issues(app):
     table = at.dataframe[0].value
     assert "send the revised quote to Acme" in list(table["task"])
     assert len(at.expander) == len(table)  # one issue preview per task
+    # regression: tasks with and without a deadline in one column made Arrow log a traceback
+    assert {"—", "2026-10-28"} <= set(table["due"]) and all(isinstance(d, str) for d in table["due"])
 
 
 def test_demo_without_streamlit_gives_install_hint(monkeypatch):

@@ -70,7 +70,9 @@ else:
 
 st.subheader(f"Tasks ({len(result.tasks)})")
 if result.tasks:
-    st.dataframe(pd.DataFrame([{"task": t.title, "owner": t.owner or "—", "due": t.due or "—", "quote": t.quote}
+    # every column all-text: mixing date objects and "—" breaks Streamlit's Arrow conversion
+    st.dataframe(pd.DataFrame([{"task": t.title, "owner": t.owner or "—",
+                                "due": t.due.isoformat() if t.due else "—", "quote": t.quote}
                                for t in result.tasks]), hide_index=True, width="stretch")
 else:
     st.write("No action items found.")

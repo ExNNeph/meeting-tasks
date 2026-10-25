@@ -18,7 +18,8 @@ def demo() -> None:
         raise SystemExit('The demo needs Streamlit: pip install -e ".[demo]"')
     subprocess.run([sys.executable, "-m", "streamlit", "run", str(DEMO_APP), "--server.address", "localhost",
                     "--server.port", "8501", "--browser.gatherUsageStats", "false",
-                    "--client.toolbarMode", "minimal"])  # hides Streamlit's "Deploy" button
+                    "--client.toolbarMode", "minimal",  # hides Streamlit's "Deploy" button
+                    "--server.fileWatcherType", "none"])  # no code reloading needed, and no "install Watchdog" hint
 
 
 def main(argv: list[str] | None = None) -> None:
