@@ -32,6 +32,64 @@ def test_demo_extracts_with_rules_and_previews_issues(app):
     assert {t.due is None for t in tasks} == {True, False}
 
 
+@pytest.fixture
+def gh(monkeypatch):
+    from meeting_tasks import issues
+
+    calls = []
+
+    def fake(*args):
+        calls.append(args)
+        return "[]" if args[:2] == ("issue", "list") else f"https://github.com/o/r/issues/{len(calls)}\n"
+
+    monkeypatch.setattr(issues, "_gh", fake)
+    return calls
+
+
+def extracted(app):
+    at = app.run()
+    at.button[0].click().run()
+    return at
+
+
+def test_create_needs_confirmation_and_then_creates(app, gh):
+    at = extracted(app)
+    at.text_input(key="repo").input("o/r").run()
+    at.text_area(key="team").input("Ben = ben-dev").run()
+    assert at.button(key="create").disabled  # nothing can be written without the tick
+    at.button(key="check").click().run()
+    assert not any(c[:2] == ("issue", "create") for c in gh)  # preview wrote nothing
+    assert any("would create (assign @ben-dev)" in i.value for i in at.info)
+    at.checkbox(key="confirm").check().run()
+    at.button(key="create").click().run()
+    assert not at.exception
+    created = [c for c in gh if c[:2] == ("issue", "create")]
+    assert len(created) == len(at.session_state["tasks"]) and len(at.success) >= len(created)
+
+
+def test_bad_repo_and_team_are_rejected_before_any_gh_call(app, gh):
+    at = extracted(app)
+    at.text_input(key="repo").input("not a repo").run()
+    assert any("owner/name" in e.value for e in at.error)
+    at.text_input(key="repo").input("o/r").run()
+    at.text_area(key="team").input("Ben ben-dev").run()
+    assert any("Team: line 1" in e.value for e in at.error)
+    assert gh == []
+
+
+def test_missing_gh_shows_readable_error(app, monkeypatch):
+    from meeting_tasks import issues
+
+    def missing(*args):
+        raise FileNotFoundError("gh")
+
+    monkeypatch.setattr(issues, "_gh", missing)
+    at = extracted(app)
+    at.text_input(key="repo").input("o/r").run()
+    at.button(key="check").click().run()
+    assert not at.exception and any("not installed" in e.value for e in at.error)
+
+
 def test_demo_without_streamlit_gives_install_hint(monkeypatch):
     real = builtins.__import__
     monkeypatch.setattr(builtins, "__import__",

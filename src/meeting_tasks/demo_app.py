@@ -1,13 +1,17 @@
-"""Local web demo (nothing is written to GitHub): started with `meeting-tasks demo`."""
+"""Local web demo, started with `meeting-tasks demo`. Writes to GitHub only after explicit confirmation."""
 import os
+import re
+import subprocess
 from datetime import date
 
 import pandas as pd
 import streamlit as st
 
 from meeting_tasks.extract import MODEL, extract
-from meeting_tasks.issues import issue_body
+from meeting_tasks.issues import issue_body, parse_team, sync
 from meeting_tasks.models import Task
+
+REPO = re.compile(r"[A-Za-z0-9-]+/[A-Za-z0-9._-]+")
 
 SAMPLE = """Anna: Okay, let's start. The Acme demo went well last week.
 Ben: Agreed. They want a revised quote before they sign.
@@ -25,8 +29,8 @@ Anna: That's all, thanks everyone."""
 
 st.set_page_config(page_title="Meeting Tasks demo", page_icon="✅", layout="wide")
 st.title("✅ Meeting Notes → Tasks")
-st.caption("Paste meeting notes, extract the action items and preview the GitHub issues. "
-           "This page never writes to GitHub.")
+st.caption("Paste meeting notes, extract the action items, review them and send them to GitHub as issues. "
+           "Nothing is written to GitHub until you confirm.")
 
 with st.sidebar:
     meeting_date = st.date_input("Meeting date", date(2026, 10, 26),
@@ -100,11 +104,62 @@ for row in edited.to_dict("records"):
                       due=None if pd.isna(row["due"]) else pd.to_datetime(row["due"]).date()))
 st.session_state.tasks = tasks
 
-if tasks:
-    st.subheader(f"GitHub issue preview ({len(tasks)})")
-    st.caption("This is what `meeting-tasks notes.txt --repo you/your-repo --create` would create.")
-    for t in tasks:
-        with st.expander(t.title):
-            st.markdown(issue_body(t, "notes.txt"))
-else:
+if not tasks:
     st.write("No tasks to send.")
+    st.stop()
+
+source = f"meeting notes from {meeting_date:%d.%m.%Y}"
+st.subheader(f"GitHub issue preview ({len(tasks)})")
+for t in tasks:
+    with st.expander(t.title):
+        st.markdown(issue_body(t, source))
+
+st.subheader("Send to GitHub")
+st.caption("Uses your `gh auth login`. Nothing is written until you tick the confirmation and click Create.")
+left, right = st.columns(2)
+repo = left.text_input("Repository", placeholder="you/your-repo", key="repo").strip()
+team_text = right.text_area("Team (optional): one 'Name = GitHub username' per line",
+                            placeholder="Ben = ben-dev\nAnna = anna42", height=110, key="team")
+try:
+    team = parse_team(team_text)
+except ValueError as e:
+    st.error(f"Team: {e}")
+    st.stop()
+if not repo:
+    st.stop()
+if not REPO.fullmatch(repo):
+    st.error("Repository must look like `owner/name`.")
+    st.stop()
+
+
+def run_sync(create: bool):
+    """sync() with readable errors instead of tracebacks; returns the results or None."""
+    try:
+        return sync(tasks, repo, source, create, team)
+    except FileNotFoundError:
+        st.error("The GitHub CLI `gh` is not installed. Install it and run `gh auth login`.")
+    except subprocess.CalledProcessError as e:
+        st.error(f"GitHub CLI error (not logged in, or no access to `{repo}`?):\n\n`{(e.stderr or str(e)).strip()}`")
+
+
+def show(results):
+    for t, status in results:
+        if status.startswith("created"):
+            st.success(f"**{t.title}**: {status}")
+        elif status.startswith("failed"):
+            st.error(f"**{t.title}**: {status}")
+        else:
+            st.info(f"**{t.title}**: {status}")
+
+
+if st.button("Check repo (preview, writes nothing)", key="check"):
+    st.session_state.checked = (repo, run_sync(create=False))
+if st.session_state.get("checked", (None,))[0] == repo and st.session_state.checked[1]:
+    show(st.session_state.checked[1])
+
+confirm = st.checkbox(f"Yes, create these {len(tasks)} issues in {repo}", key="confirm")
+if st.button(f"Create issues in {repo}", type="primary", disabled=not confirm, key="create"):
+    st.session_state.created = run_sync(create=True)
+if st.session_state.get("created"):
+    st.subheader("Result")
+    show(st.session_state.created)
