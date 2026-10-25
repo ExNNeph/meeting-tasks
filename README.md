@@ -13,16 +13,25 @@ against a keyword baseline, on a standard and a hard set of meetings.
 ![Meeting notes input](docs/preview-input.png)
 
 **2. Review the tasks.** Edit text, owner or due date, delete rows or add your own. The quote from the
-notes stays locked as evidence, and the issue preview below always shows what will be sent. This
-screenshot shows the keyword baseline (no API key) with the mistakes the eval is built to catch, like
-"be honest…" counted as a task and the quote request counted twice, which you would delete here:
+notes stays locked as evidence, and the issue preview below always shows what will be sent. Claude
+finds exactly the four real tasks in the sample meeting, each with owner, resolved deadline and quote:
 
-![Editable task table and GitHub issue preview](docs/preview-review.png)
+![Claude's tasks in the editable review table with GitHub issue preview](docs/preview-review.png)
+
+For comparison, the keyword baseline (no API key) on the same notes: seven "tasks", including
+"be honest, the onboarding flow still confuses people" and the quote request counted twice:
+
+![Keyword baseline on the same meeting](docs/preview-baseline.png)
 
 **3. Send to GitHub.** Enter the repository and optionally who is who on GitHub. "Check repo" shows
-what would happen and writes nothing; issues are only created after an explicit confirmation:
+what would happen and writes nothing; issues are only created after the confirmation tick:
 
-![Send to GitHub with repo check and assignees](docs/preview-send.png)
+![Send to GitHub with repo check, assignee and confirmation](docs/preview-send.png)
+
+Verified end to end on a real repository: the four tasks above became issues #1 to #4 with the
+`meeting-task` label, Ben's task assigned through the team mapping, and owner, deadline and quote in
+the issue text. A second "Check repo" reported all four as already open and skipped them. (The test
+issues were closed afterwards.)
 
 ## Run it locally (step by step)
 
