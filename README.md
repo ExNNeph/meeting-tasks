@@ -155,10 +155,20 @@ is why the hard set exists.
 On the hard set Claude still found all 15 tasks in every run with the right owner, including the
 person who was not in the meeting, and every tricky deadline: the one corrected mid-sentence,
 "end of the month", "within two weeks", "next Wednesday". Precision drops to 94%: three extra tasks
-over three runs, so the set separates prompts again. `run_eval.py` now prints every extra task, miss
-and wrong field per meeting; the extras of this run were not yet itemised. A likely candidate is the
-recurring rule in the retro ("deliver designs two days before sprint start"), which the answer key
-deliberately does not count as a one-off task.
+over three runs, so the set separates prompts again.
+
+**Error analysis** (`run_eval.py` prints every extra task, miss and wrong field per meeting): all
+three extras are the same sentence, once per run:
+
+```
+retro-notes.txt   extra: 'Deliver designs two days before sprint start' (Julia)
+                  from 'Julia promised to deliver designs two days before sprint start from now on.'
+```
+
+The roadmap review and support escalation were clean in all runs. So the only disagreement is a
+definition question, not a hallucination: "from now on" is a standing working agreement, which the
+answer key does not count as a one-off task for the backlog. Claude treats it as a commitment. The
+prompt never says which one is wanted, which makes this the obvious next prompt change to measure.
 
 Cost: about 890 input and 570 output tokens per meeting, roughly $0.015 per meeting at Opus 5.5
 prices; the full run above (21 Claude calls) cost about $0.31.
