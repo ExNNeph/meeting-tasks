@@ -1,0 +1,16 @@
+Mara: Let's go through the roadmap. First, the mobile app release.
+Nils: The build is ready, but QA hasn't signed off.
+Mara: Okay. Nils, please get QA sign-off by Wednesday. No wait, they're out on Wednesday, make it Thursday.
+Nils: Thursday works.
+Oskar: On the pricing experiment, someone should look at the conversion data before we decide anything.
+Mara: Oskar, that someone is you. Can you have a summary by Friday?
+Oskar: Fine, Friday.
+Petra: If legal approves the new terms, I'll update the signup page. Otherwise we keep the old one.
+Mara: Good. And the customer newsletter?
+Nils: I can draft it, I just need
+Petra: Sorry to interrupt, Nils, you're already overloaded. I'll draft the newsletter and Nils reviews it.
+Nils: Deal, I'll review it once you send it.
+Oskar: Also, I'll send the invoice reminders and close the old Jira board this afternoon.
+Mara: Last thing: I wanted to schedule the offsite, but let's push that to January.
+Petra: Should I book the venue anyway?
+Mara: No, not yet. Thanks all.

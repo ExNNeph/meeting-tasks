@@ -1,0 +1,13 @@
+Lisa: We have three escalations from Bergmann AG this week.
+Rafael: Two are the same export bug. Tom isn't here, but he told me by email he'll ship the export fix by the end of the month.
+Lisa: Okay, noted for Tom. Rafael, can you reply to Bergmann today with that timeline?
+Rafael: Yes, I'll reply today.
+Sven: The third one is about invoices. I looked at it, it's a misunderstanding on their side.
+Lisa: Then Sven, please write them a short explanation. No rush, within two weeks is fine.
+Sven: Will do.
+Rafael: We should really add an FAQ entry for this.
+Lisa: Agreed, but not this sprint.
+Sven: One more: our status page was down yesterday. I already restarted it.
+Lisa: Good. I'll add a monitoring alert for the status page tomorrow.
+Rafael: And I'll check whether other customers hit the export bug, and if so, collect their names.
+Lisa: Perfect, that's it.

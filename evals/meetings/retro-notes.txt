@@ -1,0 +1,6 @@
+Retro notes, sprint 14
+
+What went well: deploys were smooth, and Hanna's test refactoring paid off.
+What didn't: too many meetings, and the design handoff was late again.
+
+Decisions: Hanna and Ivo agreed to drop the Thursday sync; Ivo will cancel the calendar series today. Julia promised to deliver designs two days before sprint start from now on. We talked about moving to two-week sprints, but nobody wanted to change it mid-quarter, so no change. Hanna will write a short guide for the new test helpers by next Wednesday. Ivo wanted to update the onboarding doc but ran out of time; Julia offered to do it instead, by the end of January.

@@ -18,9 +18,11 @@ GOLD = json.loads((HERE / "gold.json").read_text())
 REPEATS = int(sys.argv[1]) if len(sys.argv) > 1 else 3
 
 
-def evaluate(run, repeats):
+def evaluate(run, repeats, which):
     total, dropped = Counter(), 0
     for name, case in GOLD.items():
+        if case.get("set", "standard") != which:
+            continue
         text, day = (HERE / "meetings" / name).read_text(), date.fromisoformat(case["date"])
         for i in range(repeats):
             print(f"  {name} run {i + 1}/{repeats} …", file=sys.stderr, flush=True)  # LLM calls take seconds each
@@ -37,17 +39,19 @@ def llm(text, day):
     return result.tasks, len(result.dropped)
 
 
-rows = [("rules baseline", *evaluate(lambda t, d: (ex.rule_extract(t, d), 0), 1))]
-if os.getenv("ANTHROPIC_API_KEY"):
-    rows.append((f"LLM ({ex.MODEL}) + guardrail", *evaluate(llm, REPEATS)))
-else:
-    print("No ANTHROPIC_API_KEY set: LLM row skipped.\n")
+rows = []
+for which in ["standard", "hard"]:
+    rows.append((which, "rules baseline", *evaluate(lambda t, d: (ex.rule_extract(t, d), 0), 1, which)))
+    if os.getenv("ANTHROPIC_API_KEY"):
+        rows.append((which, f"LLM ({ex.MODEL}) + guardrail", *evaluate(llm, REPEATS, which)))
+if not os.getenv("ANTHROPIC_API_KEY"):
+    print("No ANTHROPIC_API_KEY set: LLM rows skipped.\n")
 
-print("| extractor | tasks found | precision | recall | F1 | owner correct | due date correct | guardrail drops |")
-print("|---|---|---|---|---|---|---|---|")
-for name, c, dropped in rows:
+print("| set | extractor | tasks found | precision | recall | F1 | owner correct | due date correct | guardrail drops |")
+print("|---|---|---|---|---|---|---|---|---|")
+for which, name, c, dropped in rows:
     r = rates(c)
-    print(f"| {name} | {c['pred']} | {r['precision']:.0%} | {r['recall']:.0%} | {r['f1']:.0%} | "
+    print(f"| {which} | {name} | {c['pred']} | {r['precision']:.0%} | {r['recall']:.0%} | {r['f1']:.0%} | "
           f"{r['owner_acc']:.0%} | {r['due_acc']:.0%} | {dropped} |")
 if ex.usage["in"]:
     calls = len(GOLD) * REPEATS

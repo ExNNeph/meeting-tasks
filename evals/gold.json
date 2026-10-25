@@ -38,5 +38,41 @@
       {"title": "Write the first newsletter issue", "owner": "Lena", "due": "2026-11-27"},
       {"title": "Check the contract renewal with the hosting provider", "owner": "Kim", "due": "2026-11-24"}
     ]
+  },
+  "roadmap-review.txt": {
+    "set": "hard",
+    "date": "2026-12-07",
+    "traps": "deadline corrected mid-sentence, 'someone should' resolved to Oskar, conditional task, interrupted offer handed to Petra, two tasks in one sentence, offsite postponed, venue declined",
+    "tasks": [
+      {"title": "Get QA sign-off for the mobile app release", "owner": "Nils", "due": "2026-12-10"},
+      {"title": "Summarize the conversion data from the pricing experiment", "owner": "Oskar", "due": "2026-12-11"},
+      {"title": "Update the signup page if legal approves the new terms", "owner": "Petra", "due": null},
+      {"title": "Draft the customer newsletter", "owner": "Petra", "due": null},
+      {"title": "Review the customer newsletter", "owner": "Nils", "due": null},
+      {"title": "Send the invoice reminders", "owner": "Oskar", "due": "2026-12-07"},
+      {"title": "Close the old Jira board", "owner": "Oskar", "due": "2026-12-07"}
+    ]
+  },
+  "support-escalation.txt": {
+    "set": "hard",
+    "date": "2026-12-15",
+    "traps": "owner not in the meeting (Tom), 'end of the month' and 'within two weeks', FAQ deferred, status page already restarted",
+    "tasks": [
+      {"title": "Ship the export fix", "owner": "Tom", "due": "2026-12-31"},
+      {"title": "Reply to Bergmann with the export fix timeline", "owner": "Rafael", "due": "2026-12-15"},
+      {"title": "Write Bergmann a short explanation of the invoice issue", "owner": "Sven", "due": "2026-12-29"},
+      {"title": "Add a monitoring alert for the status page", "owner": "Lisa", "due": "2026-12-16"},
+      {"title": "Check which other customers hit the export bug", "owner": "Rafael", "due": null}
+    ]
+  },
+  "retro-notes.txt": {
+    "set": "hard",
+    "date": "2027-01-08",
+    "traps": "prose without speaker lines, recurring rule (designs two days early) is not a one-off task, rejected sprint change, onboarding doc handed from Ivo to Julia",
+    "tasks": [
+      {"title": "Cancel the Thursday sync calendar series", "owner": "Ivo", "due": "2027-01-08"},
+      {"title": "Write a short guide for the new test helpers", "owner": "Hanna", "due": "2027-01-13"},
+      {"title": "Update the onboarding doc", "owner": "Julia", "due": "2027-01-31"}
+    ]
   }
 }
