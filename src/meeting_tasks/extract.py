@@ -16,6 +16,8 @@ SYSTEM = """You extract action items from meeting transcripts.
 An action item is a concrete task that a person agreed to do, or was asked to do and accepted.
 Do NOT include: ideas or options that were only discussed, tasks someone declined, tasks that are
 already done, or tasks later handed to someone else (use the final owner instead).
+Also do NOT include standing agreements or new habits ("from now on", "always", "every sprint"):
+only one-off tasks that can be finished and closed belong in the backlog.
 For each action item return:
 - title: a short imperative phrase (max 10 words), e.g. "Send the revised quote to Acme"
 - owner: the first name of the person responsible, as written in the transcript; "" if unclear
