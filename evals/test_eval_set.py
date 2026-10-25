@@ -27,6 +27,21 @@ def test_labeled_owners_appear_in_the_meeting(name):
     assert all(g["owner"] in text for g in GOLD[name]["tasks"])
 
 
+def test_error_analysis_names_extras_misses_and_wrong_fields():
+    import sys
+
+    sys.path.insert(0, str(HERE))
+    from run_eval import errors
+
+    gold = GOLD["product-sync.txt"]["tasks"]
+    pred = [Task(title="Send the revised quote to Acme", owner="Anna", due="2026-10-28", quote="x" * 3),
+            Task(title="Be honest about onboarding", owner="Chris", quote="I'll be honest")]
+    lines = errors(pred, gold)
+    assert "owner:  'Send the revised quote to Acme' got 'Anna', expected 'Ben'" in lines
+    assert any(line.startswith("extra:  'Be honest") for line in lines)
+    assert sum(line.startswith("missed:") for line in lines) == 3
+
+
 @pytest.mark.parametrize("name", GOLD)
 def test_rule_baseline_runs(name):
     rule_extract((HERE / "meetings" / name).read_text(), date.fromisoformat(GOLD[name]["date"]))

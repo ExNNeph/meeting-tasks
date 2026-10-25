@@ -145,15 +145,23 @@ pytest                            # unit tests + sanity checks on the answer key
 | standard | keyword baseline | 19 | 53% | 62% | 57% | 90% | 90% | 0 |
 | standard | Claude (`claude-opus-5-5`) + guardrail | 48 | **100%** | **100%** | **100%** | 100% | 100% | 0 |
 | hard | keyword baseline | 11 | 73% | 53% | 62% | 100% | 62% | 0 |
-| hard | Claude (`claude-opus-5-5`) + guardrail | not measured yet | | | | | | |
+| hard | Claude (`claude-opus-5-5`) + guardrail | 48 | **94%** | **100%** | **97%** | 100% | 100% | 0 |
 
 On the standard set the baseline finds most explicit commitments but also every "I'll be honest" and
 duplicate, and nothing at all in notes without speaker names. Claude found all 16 tasks in every run,
 skipped every trap, resolved every relative deadline and never needed the guardrail. That saturation
 is why the hard set exists.
 
-Cost on the standard set: about 850 input and 415 output tokens per meeting, roughly $0.01 per
-meeting at Opus 5.5 prices.
+On the hard set Claude still found all 15 tasks in every run with the right owner, including the
+person who was not in the meeting, and every tricky deadline: the one corrected mid-sentence,
+"end of the month", "within two weeks", "next Wednesday". Precision drops to 94%: three extra tasks
+over three runs, so the set separates prompts again. `run_eval.py` now prints every extra task, miss
+and wrong field per meeting; the extras of this run were not yet itemised. A likely candidate is the
+recurring rule in the retro ("deliver designs two days before sprint start"), which the answer key
+deliberately does not count as a one-off task.
+
+Cost: about 890 input and 570 output tokens per meeting, roughly $0.015 per meeting at Opus 5.5
+prices; the full run above (21 Claude calls) cost about $0.31.
 
 ## Known limits
 
