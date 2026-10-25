@@ -1,0 +1,13 @@
+Anna: Okay, let's start. The Acme demo went well last week.
+Ben: Agreed. They want a revised quote before they sign.
+Anna: Ben, can you send the revised quote to Acme by Wednesday?
+Ben: Sure, I'll send it by Wednesday.
+Chris: I'll be honest, the onboarding flow still confuses people.
+Anna: We could maybe redesign the whole onboarding at some point.
+Chris: Let's not commit to that now. But I will write up the three biggest onboarding issues by Friday.
+Ben: I was going to update the pricing page, but I won't have time this week.
+Anna: Then I'll update the pricing page myself.
+Chris: Also, the bug in the export is already fixed, I deployed it this morning.
+Anna: Great. Action item: Chris to book the room for the customer workshop.
+Chris: Fine, I can do that tomorrow.
+Anna: That's all, thanks everyone.

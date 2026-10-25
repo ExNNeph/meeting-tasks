@@ -1,0 +1,10 @@
+Hugo: The landing page draft looks good, but the headline needs work.
+Greta: Understood. Ines, can you write three new headline options by Monday?
+Ines: Yes, I'll write them by Monday.
+Hugo: We might also want a video later, but let's skip that for now.
+Greta: I'll send you the updated timeline today.
+Hugo: Perfect. I will get the final logo files from our designer by Wednesday.
+Ines: Should I also translate the page into German?
+Hugo: No, not needed for launch.
+Greta: Then the last thing: action item for me, prepare the invoice for the first milestone.
+Hugo: Thanks, talk next week.

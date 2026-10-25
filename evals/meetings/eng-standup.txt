@@ -1,0 +1,11 @@
+Dana: Quick standup. Eli, where are we with the login timeout bug?
+Eli: I'll have the fix ready by Thursday.
+Fatima: I can review it once it's up.
+Dana: Good. Fatima, could you also update the API docs for the new endpoint?
+Fatima: Yes, I'll update them by Monday.
+Eli: I'm going to look into the flaky CI tests, but no promises.
+Dana: Actually, Eli, leave the flaky tests. Fatima will take those after the docs.
+Fatima: Okay, I'll take the flaky tests then.
+Dana: I will set up the staging database migration on 2026-11-10.
+Eli: The old feature flags are already removed, I did that yesterday.
+Dana: Thanks, see you tomorrow.

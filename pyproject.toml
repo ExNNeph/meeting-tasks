@@ -1,0 +1,23 @@
+[project]
+name = "meeting-tasks"
+version = "0.1.0"
+description = "Turn meeting notes into GitHub Issues: an LLM extracts action items, a guardrail drops anything not backed by the transcript."
+requires-python = ">=3.10"
+dependencies = ["pydantic>=2", "anthropic>=0.80"]
+
+[project.optional-dependencies]
+demo = ["streamlit>=1.50"]
+dev = ["pytest", "streamlit>=1.50"]
+
+[project.scripts]
+meeting-tasks = "meeting_tasks.cli:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests", "evals"]

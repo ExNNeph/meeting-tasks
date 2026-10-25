@@ -1,0 +1,42 @@
+{
+  "product-sync.txt": {
+    "date": "2026-10-26",
+    "traps": "'I'll be honest' (not a task), redesign idea, declined pricing page then taken by Anna, already-fixed bug, duplicate quote commitment",
+    "tasks": [
+      {"title": "Send the revised quote to Acme", "owner": "Ben", "due": "2026-10-28"},
+      {"title": "Write up the three biggest onboarding issues", "owner": "Chris", "due": "2026-10-30"},
+      {"title": "Update the pricing page", "owner": "Anna", "due": null},
+      {"title": "Book the room for the customer workshop", "owner": "Chris", "due": "2026-10-27"}
+    ]
+  },
+  "eng-standup.txt": {
+    "date": "2026-11-03",
+    "traps": "flaky tests handed from Eli to Fatima, feature flags already removed, 'see you tomorrow'",
+    "tasks": [
+      {"title": "Fix the login timeout bug", "owner": "Eli", "due": "2026-11-05"},
+      {"title": "Review the login timeout fix", "owner": "Fatima", "due": null},
+      {"title": "Update the API docs for the new endpoint", "owner": "Fatima", "due": "2026-11-09"},
+      {"title": "Fix the flaky CI tests", "owner": "Fatima", "due": null},
+      {"title": "Set up the staging database migration", "owner": "Dana", "due": "2026-11-10"}
+    ]
+  },
+  "client-call.txt": {
+    "date": "2026-11-13",
+    "traps": "video idea skipped, German translation declined, 'talk next week'",
+    "tasks": [
+      {"title": "Write three new headline options", "owner": "Ines", "due": "2026-11-16"},
+      {"title": "Send the updated timeline", "owner": "Greta", "due": "2026-11-13"},
+      {"title": "Get the final logo files from the designer", "owner": "Hugo", "due": "2026-11-18"},
+      {"title": "Prepare the invoice for the first milestone", "owner": "Greta", "due": null}
+    ]
+  },
+  "planning-notes.txt": {
+    "date": "2026-11-20",
+    "traps": "bullet notes without speaker lines, postponed budget, CRM decision deferred",
+    "tasks": [
+      {"title": "Draft the Q1 roadmap", "owner": "Jonas", "due": "2026-12-01"},
+      {"title": "Write the first newsletter issue", "owner": "Lena", "due": "2026-11-27"},
+      {"title": "Check the contract renewal with the hosting provider", "owner": "Kim", "due": "2026-11-24"}
+    ]
+  }
+}
