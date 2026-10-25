@@ -2,20 +2,27 @@
 
 Turn meeting notes into **GitHub Issues**. An LLM (Claude) reads the notes and extracts every action
 item with owner, due date and the sentence it came from. A guardrail drops any task whose quote or
-owner is not actually in the notes, so nothing invented ends up in your backlog. A labeled eval
-measures precision and recall against a keyword baseline.
+owner is not actually in the notes, so nothing invented ends up in your backlog. You review and edit
+the tasks, then create them as labeled, assigned issues. A labeled eval measures precision and recall
+against a keyword baseline, on a standard and a hard set of meetings.
 
 ## Preview
 
-Paste meeting notes, pick the meeting date (for deadlines like "Friday") and click **Extract tasks**:
+**1. Paste meeting notes**, pick the meeting date (for deadlines like "Friday") and click **Extract tasks**:
 
 ![Meeting notes input](docs/preview-input.png)
 
-The result: a task table with owner, due date and supporting quote, plus a preview of each GitHub issue.
-This screenshot shows the keyword baseline (no API key), including the mistakes the eval is built to catch,
-like "be honest…" counted as a task and the quote request counted twice:
+**2. Review the tasks.** Edit text, owner or due date, delete rows or add your own. The quote from the
+notes stays locked as evidence, and the issue preview below always shows what will be sent. This
+screenshot shows the keyword baseline (no API key) with the mistakes the eval is built to catch, like
+"be honest…" counted as a task and the quote request counted twice, which you would delete here:
 
-![Extracted tasks from the keyword baseline](docs/preview-tasks-baseline.png)
+![Editable task table and GitHub issue preview](docs/preview-review.png)
+
+**3. Send to GitHub.** Enter the repository and optionally who is who on GitHub. "Check repo" shows
+what would happen and writes nothing; issues are only created after an explicit confirmation:
+
+![Send to GitHub with repo check and assignees](docs/preview-send.png)
 
 ## Run it locally (step by step)
 
@@ -48,7 +55,10 @@ Things to try in the demo:
   then extract again: Claude skips "I'll be honest", the declined pricing-page task and the finished bug fix.
 - Edit the notes, for example add `Ben: I'll call the lawyer on Thursday.`, and extract again.
 - Change the **meeting date**: relative deadlines like "Friday" move with it.
-- Open an entry under **GitHub issue preview** to see the exact issue text.
+- In **Review the tasks**, delete the wrong rows, fix a title or add a task of your own: the
+  **GitHub issue preview** follows immediately.
+- Under **Send to GitHub**, enter a repository you own and click **Check repo**: it lists what would be
+  created or skipped and writes nothing. Only the confirmation tick plus **Create issues** writes.
 
 ## How it works
 
@@ -62,7 +72,10 @@ Things to try in the demo:
    so the tool still works offline. The same baseline is the comparison point in the eval.
 4. `issues.py`: creates one GitHub issue per task through the `gh` CLI, so your existing
    `gh auth login` is used and no token passes through this tool. Open issues with the same title are
-   skipped, so running it twice does not create duplicates.
+   skipped, so running it twice does not create duplicates. Issues get the `meeting-task` label and,
+   when the owner is in the team mapping, an assignee.
+5. `demo_app.py`: the review step. Edits in the table are what gets sent; writing to GitHub needs a
+   confirmation tick, and `gh` errors (not installed, not logged in, no access) are shown as messages.
 
 ## Command line (real use)
 
@@ -72,7 +85,20 @@ With the virtual environment from the steps above active and `gh auth login` don
 meeting-tasks notes.txt --date 2026-10-26                       # print the tasks
 meeting-tasks notes.txt --repo you/your-repo                    # preview the issues, creates nothing
 meeting-tasks notes.txt --repo you/your-repo --create           # create the issues
+meeting-tasks notes.txt --repo you/your-repo --team team.txt --create   # ...and assign people
 ```
+
+`team.txt` maps the names used in meetings to GitHub usernames; owners not listed stay unassigned:
+
+```
+# Name = GitHub username
+Ben = ben-dev
+Anna = @anna42
+```
+
+Every issue gets the label `meeting-task` (created automatically if the repository does not have it).
+If one issue fails, for example because a username has no access to the repository, the others are
+still created and the failure is reported for that task.
 
 | Variable | Needed for |
 |---|---|
@@ -84,15 +110,21 @@ declined by a safety classifier is retried on a fallback model instead of failin
 
 ## Evals
 
-`evals/meetings/` holds four meetings with a hand-labeled answer key in `evals/gold.json`. Each one
-contains traps that a naive extractor falls for:
+`evals/meetings/` holds seven meetings with a hand-labeled answer key in `evals/gold.json` (31 tasks).
+Each one contains traps that a naive extractor falls for:
 
-| meeting | traps |
-|---|---|
-| product sync | "I'll be honest" (not a task), an idea nobody committed to, a declined task taken over by someone else, a bug that is already fixed, the same task said twice |
-| engineering standup | a task handed from one person to another, work already done, "see you tomorrow" |
-| client call | an idea that was skipped, a request that was declined |
-| planning notes | bullet points without speaker names, a postponed topic, a decision deferred to January |
+| set | meeting | traps |
+|---|---|---|
+| standard | product sync | "I'll be honest" (not a task), an idea nobody committed to, a declined task taken over by someone else, a bug that is already fixed, the same task said twice |
+| standard | engineering standup | a task handed from one person to another, work already done, "see you tomorrow" |
+| standard | client call | an idea that was skipped, a request that was declined |
+| standard | planning notes | bullet points without speaker names, a postponed topic, a decision deferred to January |
+| hard | roadmap review | a deadline corrected mid-sentence, "someone should…" resolved to a person, a conditional task, an interrupted offer handed to someone else, two tasks in one sentence |
+| hard | support escalation | an owner who is not in the meeting, "end of the month" and "within two weeks", a deferred idea, work already done |
+| hard | retro notes | prose without speaker lines, a recurring rule that is not a one-off task, a rejected change, a hand-over |
+
+The hard set was added after Claude reached 100% on the standard set, so the eval can still tell
+a good prompt from a better one.
 
 Predicted and labeled tasks are matched one-to-one by title (shared content words). Reported are
 **precision** (share of found tasks that are real), **recall** (share of real tasks found), and for
@@ -105,29 +137,31 @@ pytest                            # unit tests + sanity checks on the answer key
 
 ## Results
 
-`python evals/run_eval.py 3` (4 meetings, Claude 3 runs each):
+`python evals/run_eval.py 3` (Claude 3 runs per meeting):
 
-| extractor | tasks found | precision | recall | F1 | owner correct | due date correct | guardrail drops |
-|---|---|---|---|---|---|---|---|
-| keyword baseline | 19 | 53% | 62% | 57% | 90% | 90% | 0 |
-| Claude (`claude-opus-5-5`) + guardrail | 48 | **100%** | **100%** | **100%** | 100% | 100% | 0 |
+| set | extractor | tasks found | precision | recall | F1 | owner correct | due date correct | guardrail drops |
+|---|---|---|---|---|---|---|---|---|
+| standard | keyword baseline | 19 | 53% | 62% | 57% | 90% | 90% | 0 |
+| standard | Claude (`claude-opus-5-5`) + guardrail | 48 | **100%** | **100%** | **100%** | 100% | 100% | 0 |
+| hard | keyword baseline | 11 | 73% | 53% | 62% | 100% | 62% | 0 |
+| hard | Claude (`claude-opus-5-5`) + guardrail | not measured yet | | | | | | |
 
-The baseline finds most explicit commitments but also every "I'll be honest" and duplicate, and
-nothing at all in notes without speaker names. Claude found all 16 tasks in every run, skipped every
-trap, resolved every relative deadline and never needed the guardrail.
+On the standard set the baseline finds most explicit commitments but also every "I'll be honest" and
+duplicate, and nothing at all in notes without speaker names. Claude found all 16 tasks in every run,
+skipped every trap, resolved every relative deadline and never needed the guardrail. That saturation
+is why the hard set exists.
 
-Cost: about 850 input and 415 output tokens per meeting, roughly $0.01 per meeting at Opus 5.5 prices.
-
-**What 100% means:** this eval is now too easy to tell a good prompt from a better one. It proves the
-traps are handled, not that the extractor is perfect. The next step is harder meetings: longer
-transcripts, interruptions, tasks split across speakers, and implicit owners ("someone should…").
+Cost on the standard set: about 850 input and 415 output tokens per meeting, roughly $0.01 per
+meeting at Opus 5.5 prices.
 
 ## Known limits
 
-- The eval is small (4 meetings, 16 labeled tasks) and synthetic, written to contain known traps.
+- The eval is small (7 meetings, 31 labeled tasks) and synthetic, written to contain known traps.
+  Some labels are judgment calls (is a conditional task a task?); the traps column says which.
 - Title matching is word overlap, so a correct task phrased very differently can count as a miss.
-- Owners are first names as spoken. They are written into the issue body, not mapped to GitHub
-  assignees.
+- Owners are first names as spoken. They become GitHub assignees only through the team mapping;
+  two people with the same first name cannot be told apart.
+- GitHub has no due date field for issues, so the deadline lives in the issue text.
 - English notes only.
 
 ## License
